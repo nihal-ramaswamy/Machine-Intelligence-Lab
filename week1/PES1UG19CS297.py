@@ -23,19 +23,29 @@ def create_identity_numpy_array(order):
     #return a identity numpy array of the defined order
     return np.identity(order)
 
-
 #input: numpy array
 def matrix_cofactor(array):
     #return cofactor matrix of the given array
-    """
-        Inverse of Matrix = Adjoint of Matrix / Determinant of Matrix
-        Adjoint of Matrix = Inverse of Matrix * Determinant of Matrix
-        Cofactor of Matrix = transpose(Adjoint of Matrix)
+    __get_range = lambda i, x: list(range(i)) + list(range(i + 1, x))
+    __get_minor = lambda arr, d, i, j: arr[
+                np.array(__get_range(i, d[0]))[:, np.newaxis],
+                np.array(__get_range(j, d[1]))]
 
-        Cofactor of Matrix = transpose(Inverse of Matrix * Determinant of Matrix)
-        Cofactor of Matrix = transpose(Inverse of Matrix) * Determinant of Matrix
-    """
-    return np.linalg.inv(array).T * np.linalg.det(array)
+    dim_297 = array.shape
+    if dim_297[0] == 1:
+        return array
+    if dim_297[0] == 2:
+        return np.array([[array[1][1], -1 * array[1][0]],
+                         [-1 * array[0][1], array[0][0]]])
+
+    cf_297 = []
+    for r_297 in range(dim_297[0]):
+        cfr_297 = []
+        for c_297 in range(dim_297[0]):
+            m_297 = __get_minor(array, dim_297, r_297, c_297)
+            cfr_297.append(((-1)**(r_297 + c_297)) * np.linalg.det(m_297))
+        cf_297.append(cfr_297)
+    return np.array(cf_297)
 
 
 #Input: (numpy array, int ,numpy array, int , int , int , int , tuple,tuple)
@@ -53,14 +63,14 @@ def f1(X1, coef1, X2, coef2, seed1, seed2, seed3, shape1, shape2):
         return -1
 
     np.random.seed(seed1)
-    w1_217 = np.random.rand(*shape1)
+    w1_297 = np.random.rand(*shape1)
     np.random.seed(seed2)
-    w2_217 = np.random.rand(*shape2)
+    w2_297 = np.random.rand(*shape2)
     np.random.seed(seed3)
-    b_217 = np.random.rand(shape2[0], X1.shape[1])
+    b_297 = np.random.rand(shape2[0], X1.shape[1])
 
-    return np.matmul(w1_217, np.linalg.matrix_power(X1, coef1)) + np.matmul(
-        w2_217, np.linalg.matrix_power(X2, coef2)) + b_217
+    return np.matmul(w1_297, np.linalg.matrix_power(X1, coef1)) + np.matmul(
+        w2_297, np.linalg.matrix_power(X2, coef2)) + b_297
 
 
 def fill_with_mode(filename, column):
