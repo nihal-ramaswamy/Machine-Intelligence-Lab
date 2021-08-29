@@ -23,13 +23,14 @@ def create_identity_numpy_array(order):
     #return a identity numpy array of the defined order
     return np.identity(order)
 
+
 #input: numpy array
 def matrix_cofactor(array):
     #return cofactor matrix of the given array
     __get_range = lambda i, x: list(range(i)) + list(range(i + 1, x))
-    __get_minor = lambda arr, d, i, j: arr[
-                np.array(__get_range(i, d[0]))[:, np.newaxis],
-                np.array(__get_range(j, d[1]))]
+    __get_minor = lambda arr, d, i, j: arr[np.array(__get_range(i, d[0]))
+                                           [:, np.newaxis],
+                                           np.array(__get_range(j, d[1]))]
 
     dim_297 = array.shape
     if dim_297[0] == 1:
@@ -59,7 +60,8 @@ def f1(X1, coef1, X2, coef2, seed1, seed2, seed3, shape1, shape2):
     # if dimension mismatch occur return -1
 
     if (X1.shape[0] != shape1[1]) or (X2.shape[0] != shape2[1]) or (
-        (shape1[0], X1.shape[1]) != (shape2[0], X2.shape[1])):
+        ((shape1[0], X1.shape[1]) != (shape2[0], X2.shape[1])) or
+        (X1.shape[0] != X1.shape[1]) or (X2.shape[0] != X2.shape[1])):
         return -1
 
     np.random.seed(seed1)
