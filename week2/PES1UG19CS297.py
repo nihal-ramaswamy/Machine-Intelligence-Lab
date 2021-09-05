@@ -2,9 +2,10 @@
 You can create any other helper funtions.
 Do not modify the given functions
 """
+
 class Stack:
-    def __init__(self):
-        self.stack = []
+    def __init__(self, root):
+        self.stack = [root]
 
     def push(self, element):
         self.stack.append(element)
@@ -18,6 +19,7 @@ class Stack:
             node = self.stack.pop()
         return node
 
+
 class PQ_Node:
     def __init__(self, cost, node):
         self.cost = cost
@@ -30,31 +32,29 @@ class PQ_Node:
             return False
         return self.node < other.node
 
-class Heap:
-    def __init__(self):
-        self.heap = []
 
-    def size(self):
-        return len(self.heap)
+class Heap:
+    def __init__(self, root):
+        self.heap = [root]
 
     def _siftup(self, pos):
-        endpos = len(self.heap)
-        startpos = pos
+        end = self.size()
+        start = pos
         newitem = self.heap[pos]
-        childpos = 2*pos + 1
-        while childpos < endpos:
-            rightpos = childpos + 1
-            if rightpos < endpos and not self.heap[childpos] < self.heap[rightpos]:
-                childpos = rightpos
-            self.heap[pos] = self.heap[childpos]
-            pos = childpos
-            childpos = 2*pos + 1
+        child = 2 * pos + 1
+        while child < end:
+            right = child + 1
+            if right < end and not self.heap[child] < self.heap[right]:
+                child = right
+            self.heap[pos] = self.heap[child]
+            pos = child
+            child = 2 * pos + 1
         self.heap[pos] = newitem
-        self._siftdown(startpos, pos)
+        self._siftdown(start, pos)
 
-    def _siftdown(self, startpos, pos):
+    def _siftdown(self, start, pos):
         newitem = self.heap[pos]
-        while pos > startpos:
+        while pos > start:
             parentpos = (pos - 1) >> 1
             parent = self.heap[parentpos]
             if newitem < parent:
@@ -64,9 +64,12 @@ class Heap:
             break
         self.heap[pos] = newitem
 
+    def size(self):
+        return len(self.heap)
+
     def heappush(self, item):
         self.heap.append(item)
-        self._siftdown(0, len(self.heap)-1)
+        self._siftdown(0, len(self.heap) - 1)
 
     def heappop(self):
         last_element = self.heap.pop()
@@ -76,6 +79,16 @@ class Heap:
             self._siftup(0)
             return returnitem
         return last_element
+
+
+def getCommonVars(length, start, root, data_structure):
+    visited = [False] * length
+    parents = [-1] * length
+    parents[start] = start
+    if data_structure == "Heap":
+        return [visited, parents, Heap(root)]
+    else:
+        return [visited, parents, Stack(root)]
 
 
 def findPath(parents, start, end):
@@ -101,37 +114,22 @@ def A_star_Traversal(cost, heuristic, start_point, goals):
         path: path to goal state obtained from A*(list of ints)
     """
     minCost = {start_point: 0}
-
-    parents = [-1 for i in range(len(cost))]
-    parents[start_point] = start_point
-
-    pQueue = Heap()
-    pQueue.heappush(PQ_Node(0, start_point))
-    # pQueue = [PQ_Node(0, start_point)]
-    visited = [False for i in range(len(cost))]
-
+    visited, parents, pQueue = getCommonVars(len(cost), start_point,
+                                             PQ_Node(0, start_point), "Heap")
     while pQueue.size():
-
-        # node = hq.heappop(pQueue).node
         node = pQueue.heappop().node
-
         if visited[node]:
             continue
-
         if node in goals:
             return findPath(parents, start_point, node)
-
         visited[node] = True
-
         for child in range(len(cost[node])):
             if cost[node][child] in [0, -1] or visited[child]:
                 continue
-
-            if child not in minCost or minCost[node] + cost[node][
-                    child] <= minCost[child]:
-                minCost[child] = minCost[node] + cost[node][child]
+            child_cost = minCost[node] + cost[node][child]
+            if child not in minCost or child_cost <= minCost[child]:
+                minCost[child] = child_cost
                 parents[child] = node
-
             pQueue.heappush(PQ_Node(minCost[child] + heuristic[child], child))
     return []
 
@@ -145,25 +143,18 @@ def DFS_Traversal(cost, start_point, goals):
     Returns:
         path: path to goal state obtained from DFS(list of ints)
     """
-    path = []
-    stack = Stack()
-    stack.push(start_point)
-    visited = [False for node in range(len(cost))]
-    parents = [-1 for i in range(len(cost))]
-
+    visited, parents, stack = getCommonVars(len(cost), start_point,
+                                            start_point, "Stack")
     while stack.size():
         node = stack.pop()
         if node in goals:
             return findPath(parents, start_point, node)
-
         if visited[node]:
             continue
-
         visited[node] = True
-
         for child in range(len(cost[node]) - 1, 0, -1):
             if visited[child] == True or cost[node][child] in [0, -1]:
                 continue
             stack.push(child)
             parents[child] = node
-    return path
+    return []
