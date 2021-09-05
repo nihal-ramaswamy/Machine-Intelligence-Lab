@@ -3,6 +3,7 @@ You can create any other helper funtions.
 Do not modify the given functions
 """
 
+
 class Stack:
     def __init__(self, root):
         self.stack = [root]
@@ -31,6 +32,9 @@ class PQ_Node:
         if self.cost > other.cost:
             return False
         return self.node < other.node
+
+    def __repr__(self):
+        print(f"Node: {self.node} Cost: {self.cost}")
 
 
 class Heap:
@@ -153,7 +157,7 @@ def DFS_Traversal(cost, start_point, goals):
             continue
         visited[node] = True
         for child in range(len(cost[node]) - 1, 0, -1):
-            if visited[child] == True or cost[node][child] in [0, -1]:
+            if visited[child] or cost[node][child] in [0, -1]:
                 continue
             stack.push(child)
             parents[child] = node
