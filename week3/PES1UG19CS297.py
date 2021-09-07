@@ -10,18 +10,9 @@ import random
     #output:int/float/double/large
 
 def get_entropy_of_dataset(df):
-    entropy = 0
-    eps = np.finfo(float).eps
-    target =  list(df.iloc[:, -1])
-    size = len(target)
-    categ = list(set(target))
-    for i in categ:
-        p = target.count(i)/size
-        if p!=0:
-            entropy = entropy + (-p*np.log2(p))
-        else :
-            continue
-    return entropy
+    df_col = df.iloc[:,-1]
+    norm_counts = np.unique(df_col, return_counts=True)[1] / len(df_col)
+    return -(norm_counts * np.log(norm_counts)/np.log(2)).sum()
 
 
 
@@ -29,16 +20,11 @@ def get_entropy_of_dataset(df):
     #input:pandas_dataframe,str   {i.e the column name ,ex: Temperature in the Play tennis dataset}
     #output:int/float/double/large
 def get_avg_info_of_attribute(df,attribute):
-    entropy_of_attribute = 0
-    size = df.shape[0]
-    uniq_attr_cat = set(list(df[attribute]))
-    entropies = list()
-    for i in uniq_attr_cat:
+    entropy = 0
+    for i in np.unique(df[attribute]):
         df_sub = df.loc[df[attribute] == i]
-        sub_size = df_sub.shape[0]
-        entropies.append(get_entropy_of_dataset(df_sub))
-        entropy_of_attribute = entropy_of_attribute + ((sub_size/size)*entropies[-1])
-    return abs(entropy_of_attribute)
+        entropy += ((df_sub.shape[0]/df.shape[0])*get_entropy_of_dataset(df_sub))
+    return abs(entropy)
 
 
 
@@ -46,9 +32,7 @@ def get_avg_info_of_attribute(df,attribute):
     #input:int/float/double/large,int/float/double/large
     #output:int/float/double/large
 def get_information_gain(df,attribute):
-    information_gain = 0
-    information_gain = get_entropy_of_dataset(df) - get_avg_info_of_attribute(df, attribute)
-    return information_gain
+    return get_entropy_of_dataset(df) - get_avg_info_of_attribute(df, attribute)
 
 
 
@@ -57,29 +41,19 @@ def get_information_gain(df,attribute):
     #output: ({dict},'str')
 def get_selected_attribute(df):
 
-    information_gains={}
-    selected_column=''
+    information_gains=dict()
+    selected_column=selected_column_max_value=None
 
     '''
     Return a tuple with the first element as a dictionary which has IG of all columns
     and the second element as a string with the name of the column selected
     example : ({'A':0.123,'B':0.768,'C':1.23} , 'C')
     '''
-
-    attributes = list(df.columns)
-    attributes = attributes[ : -1]
-    for attribute in attributes:
-        information_gains[attribute] = get_information_gain(df, attribute)
-
-    selected_column = max(information_gains, key=information_gains.get)
+    for column_name in list(df.columns)[: -1]:
+        information_gains[column_name] = get_information_gain(df, column_name)
+        if selected_column_max_value == None or selected_column_max_value < information_gains[column_name]:
+            selected_column_max_value = information_gains[column_name]
+            selected_column = column_name
 
     return (information_gains,selected_column)
 
-
-
-'''
-------- TEST CASES --------
-How to run sample test cases ?
-Simply run the file DT_SampleTestCase.py
-Follow convention and do not change any file / function names
-'''
