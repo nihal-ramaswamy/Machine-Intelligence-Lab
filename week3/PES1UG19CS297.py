@@ -40,15 +40,14 @@ def get_information_gain(df,attribute):
     #input: pandas_dataframe
     #output: ({dict},'str')
 def get_selected_attribute(df):
-
-    information_gains=dict()
-    selected_column=selected_column_max_value=None
-
     '''
     Return a tuple with the first element as a dictionary which has IG of all columns
     and the second element as a string with the name of the column selected
     example : ({'A':0.123,'B':0.768,'C':1.23} , 'C')
     '''
+    information_gains=dict()
+    selected_column=selected_column_max_value=None
+
     for column_name in list(df.columns)[: -1]:
         information_gains[column_name] = get_information_gain(df, column_name)
         if selected_column_max_value == None or selected_column_max_value < information_gains[column_name]:
