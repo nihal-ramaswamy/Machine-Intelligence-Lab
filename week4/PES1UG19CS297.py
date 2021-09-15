@@ -1,5 +1,5 @@
 import numpy as np
-
+import bisect
 
 class KNN:
     """
@@ -25,13 +25,13 @@ class KNN:
         distances = self.find_distance(x)
 
         distances_with_index=[]
-        for i in range(len(distances)):
+        for i in distances:
             distances_with_index_single = []
-            for j in range(len(distances[i])):
-                distances_with_index_single.append([distances[i][j], j])
-            distances_with_index_single.sort()
-            distances_with_index_single = distances_with_index_single[:self.k_neigh]
-            distances_with_index.append(distances_with_index_single)
+            idx = 0
+            for j in i:
+                bisect.insort_left(distances_with_index_single, [j, idx])
+                idx += 1
+            distances_with_index.append(distances_with_index_single[:self.k_neigh])
         return distances_with_index
 
     def _get_prediction_single(self, vector):
@@ -65,10 +65,7 @@ class KNN:
             (N x M) Matrix (N Number of inputs, M number of samples in the train dataset)(float)
         """
         # TODO
-        minkowski_distances = []
-        for vector in x:
-            minkowski_distances.append(self._find_distance_single(vector))
-        return minkowski_distances
+        return [self._find_distance_single(vector) for vector in x]
 
     def k_neighbours(self, x):
         """
@@ -109,10 +106,7 @@ class KNN:
             pred: Vector of length N (Predicted target value for each input)(int)
         """
         # TODO
-        prediction = []
-        for vector in x:
-            prediction.append(self._get_prediction_single(vector))
-        return prediction
+        return [self._get_prediction_single(vector) for vector in x]
 
     def evaluate(self, x, y):
         """
@@ -126,6 +120,5 @@ class KNN:
         """
         # TODO
         prediction = np.array(self.predict(x))
-        true_value = np.array(y)
-        return ((true_value == prediction).sum() / len(prediction))*100
+        return ((y == prediction).sum() / len(prediction))*100
 
