@@ -1,5 +1,6 @@
 import numpy as np
 import bisect
+from collections import defaultdict
 
 class KNN:
     """
@@ -35,10 +36,10 @@ class KNN:
         return distances_with_index
 
     def _get_prediction_single(self, vector):
-        distances_with_index = self._get_neighbours_with_index(vector)[0]
-        val_of_k_neigh = [self.target[i[1]] for i in distances_with_index]
-        return np.bincount(val_of_k_neigh).argmax()
-
+        labels = defaultdict(lambda : 0.)
+        for i in self._get_neighbours_with_index(vector)[0]:
+            labels[self.target[i[1]]] += (1/(i[0]+self.EPS) if self.weighted else 1)
+        return max(labels, key=lambda x: labels[x])
 
     def fit(self, data, target):
         """
