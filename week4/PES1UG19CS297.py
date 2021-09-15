@@ -2,6 +2,7 @@ import numpy as np
 import bisect
 from collections import defaultdict
 
+
 class KNN:
     """
     K Nearest Neighbours model
@@ -20,25 +21,27 @@ class KNN:
         self.EPS = 1e-9
 
     def _find_distance_single(self, x):
-        return (np.abs(x-self.data)**self.p).sum(axis=1)**(1/self.p)
+        return (np.abs(x - self.data)**self.p).sum(axis=1)**(1 / self.p)
 
     def _get_neighbours_with_index(self, x):
         distances = self.find_distance(x)
 
-        distances_with_index=[]
+        distances_with_index = []
         for i in distances:
             distances_with_index_single = []
             idx = 0
             for j in i:
                 bisect.insort_left(distances_with_index_single, [j, idx])
                 idx += 1
-            distances_with_index.append(distances_with_index_single[:self.k_neigh])
+            distances_with_index.append(
+                distances_with_index_single[:self.k_neigh])
         return distances_with_index
 
     def _get_prediction_single(self, vector):
-        labels = defaultdict(lambda : 0.)
+        labels = defaultdict(lambda: 0.)
         for i in self._get_neighbours_with_index(vector)[0]:
-            labels[self.target[i[1]]] += (1/(i[0]+self.EPS) if self.weighted else 1)
+            labels[self.target[i[1]]
+                   ] += (1 / (i[0] + self.EPS) if self.weighted else 1)
         return max(labels, key=lambda x: labels[x])
 
     def fit(self, data, target):
@@ -87,12 +90,12 @@ class KNN:
 
         neigh_dists = []
         idx_of_neigh = []
-        for i in range(len(distances_with_index)):
+        for i in distances_with_index:
             neigh_dists_single = []
             idx_of_neigh_single = []
-            for j in range(len(distances_with_index[i])):
-                neigh_dists_single.append(distances_with_index[i][j][0])
-                idx_of_neigh_single.append(distances_with_index[i][j][1])
+            for j in i:
+                neigh_dists_single.append(j[0])
+                idx_of_neigh_single.append(j[1])
             neigh_dists.append(neigh_dists_single)
             idx_of_neigh.append(idx_of_neigh_single)
 
@@ -111,7 +114,7 @@ class KNN:
 
     def evaluate(self, x, y):
         """
-        Evaluate Model on test data using 
+        Evaluate Model on test data using
             classification: accuracy metric
         Args:
             x: Test data (N x D) matrix(float)
@@ -121,5 +124,4 @@ class KNN:
         """
         # TODO
         prediction = np.array(self.predict(x))
-        return ((y == prediction).sum() / len(prediction))*100
-
+        return ((y == prediction).sum() / len(prediction)) * 100
