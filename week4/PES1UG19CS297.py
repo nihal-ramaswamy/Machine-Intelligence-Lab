@@ -13,21 +13,18 @@ class KNN:
         p: Parameter of Minkowski distance
     """
 
-    def __init__(self, k_neigh, weighted=False, p=2):
+    def __init__(self, k_neigh, weighted=False, p=2, EPS=1e-9):
 
         self.weighted = weighted
         self.k_neigh = k_neigh
         self.p = p
-        self.EPS = 1e-9
-
-    def _find_distance_single(self, x):
-        return (np.abs(x - self.data)**self.p).sum(axis=1)**(1 / self.p)
+        self.EPS = EPS
 
     def _get_neighbours_with_index(self, x):
-        distances = self.find_distance(x)
 
         distances_with_index = []
-        for i in distances:
+
+        for i in self.find_distance(x):
             distances_with_index_single = []
             idx = 0
             for j in i:
@@ -35,13 +32,17 @@ class KNN:
                 idx += 1
             distances_with_index.append(
                 distances_with_index_single[:self.k_neigh])
+
         return distances_with_index
 
     def _get_prediction_single(self, vector):
+
         labels = defaultdict(lambda: 0.)
+
         for i in self._get_neighbours_with_index(vector)[0]:
             labels[self.target[i[1]]
                    ] += (1 / (i[0] + self.EPS) if self.weighted else 1)
+
         return max(labels, key=lambda x: labels[x])
 
     def fit(self, data, target):
@@ -68,8 +69,8 @@ class KNN:
             Distance between each input to every data point in the train dataset
             (N x M) Matrix (N Number of inputs, M number of samples in the train dataset)(float)
         """
-        # TODO
-        return [self._find_distance_single(vector) for vector in x]
+        return [(np.abs(vector - self.data)**self.p).sum(axis=1)
+                ** (1 / self.p) for vector in x]
 
     def k_neighbours(self, x):
         """
@@ -84,12 +85,11 @@ class KNN:
 
             Note that each row of both neigh_dists and idx_of_neigh must be SORTED in increasing order of distance
         """
-        # TODO
 
         distances_with_index = self._get_neighbours_with_index(x)
-
         neigh_dists = []
         idx_of_neigh = []
+
         for i in distances_with_index:
             neigh_dists_single = []
             idx_of_neigh_single = []
@@ -109,7 +109,6 @@ class KNN:
         Returns:
             pred: Vector of length N (Predicted target value for each input)(int)
         """
-        # TODO
         return [self._get_prediction_single(vector) for vector in x]
 
     def evaluate(self, x, y):
@@ -122,6 +121,5 @@ class KNN:
         Returns:
             accuracy : (float.)
         """
-        # TODO
-        prediction = np.array(self.predict(x))
-        return ((y == prediction).sum() / len(prediction)) * 100
+
+        return ((y == np.array(self.predict(x))).sum() / len(x)) * 100

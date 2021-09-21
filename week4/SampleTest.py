@@ -125,6 +125,7 @@ def test_case2():
     except:
         print("Test Case 2 for the function k_neighbours (idx) FAILED")
 
+    model.predict(X_test)
     try:
         np.testing.assert_array_equal(
             model.predict(X_test), pred)
