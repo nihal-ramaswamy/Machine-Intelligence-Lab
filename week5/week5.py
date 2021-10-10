@@ -182,24 +182,22 @@ class Tensor:
         """
         # TODO
 
-        if self.requires_grad == None: return
+        if self.requires_grad == None:
+            return
+
+        if self.history[0] not in ["add", "matmul"]:
+            self.grad = gradients
+            return
+
         if self.history[0] == 'add':
-
             gradient = self.grad_add(gradients)
-            if self.history[1]:
-                self.history[1].backward(gradient[0])
-            if self.history[2]:
-                self.history[2].backward(gradient[1])
-
         elif self.history[0] == 'matmul':
             gradient = self.grad_matmul(gradients)
-            if self.history[1]:
-                self.history[1].backward(gradient[0])
-            if self.history[2]:
-                self.history[2].backward(gradient[1])
-        else:
-            if self.requires_grad:
-                self.grad = gradients
+
+        for i in range(2):
+            if self.history[i+1]:
+                self.history[i+1].backward(gradient[i])
+
 
 
 
