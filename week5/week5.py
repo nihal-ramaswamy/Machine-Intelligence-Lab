@@ -150,13 +150,17 @@ class Tensor:
         # TODO
         _, op1, op2 = self.history
 
-        x1 = np.matmul(np.ones_like(op1.arr), op2.arr.transpose())
-        x2 = (np.matmul(np.ones_like(op2.arr), op1.arr)).transpose()
+        temp = [np.matmul(np.ones_like(op1.arr), op2.arr.transpose()), (np.matmul(np.ones_like(op2.arr), op1.arr)).transpose()]
+        j = 0
+        for op in [op1, op2]:
+            if op.requires_grad:
+                op.grad += temp[j] if gradients is None else np.multiply(temp[j], gradients)
+            j += 1
 
-        if op1.requires_grad:
-            op1.grad += x1 if gradients is None else np.multiply(x1, gradients)
-        if op2.requires_grad:
-            op2.grad += x2 if gradients is None else np.multiply(x2, gradients)
+        # if op1.requires_grad:
+        #     op1.grad += x1 if gradients is None else np.multiply(x1, gradients)
+        # if op2.requires_grad:
+        #     op2.grad += x2 if gradients is None else np.multiply(x2, gradients)
 
         return (op1.grad, op2.grad)
 
