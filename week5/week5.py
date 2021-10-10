@@ -124,24 +124,16 @@ class Tensor:
         # TODO
         _, op1, op2 = self.history
 
+        for op in [op1, op2]:
+            op.grad = np.zeros_like(op.arr)
 
         for op in [op1, op2]:
-            op.grad = np.ones_like(op.arr) if op.requires_grad else np.zeros_like(op.arr)
-            if gradients is None:
-                continue
-            op.grad = np.multiply(np.ones_like(op.arr), gradients)
+            if op.requires_grad:
+                op.grad += np.ones_like(op.arr)
+            if op.requires_grad and gradients is not None:
+                op.grad = np.multiply(np.ones_like(op.arr), gradients)
 
         return (op1.grad, op2.grad)
-
-        # op1.grad=np.zeros_like(op1.arr)
-        # op2.grad=np.zeros_like(op2.arr)
-        # if op1.requires_grad: op1.grad += np.ones_like(op1.arr)
-        # if op2.requires_grad: op2.grad += np.ones_like(op2.arr)
-        # if gradients is None:
-        #     return (op1.grad,op2.grad)
-        # if op1.requires_grad: op1.grad = np.multiply(np.ones_like(op1.arr), gradients)
-        # if op2.requires_grad: op2.grad = np.multiply(np.ones_like(op2.arr), gradients)
-        # return (op1.grad, op2.grad)
 
     def grad_matmul(self, gradients=None):
         """
@@ -157,16 +149,14 @@ class Tensor:
         """
         # TODO
         _, op1, op2 = self.history
-        if gradients is None:
-        	if op1.requires_grad:
-        		op1.grad += np.matmul(np.ones_like(op1.arr), op2.arr.transpose())
-        	if op2.requires_grad:
-        		op2.grad += (np.matmul(np.ones_like(op2.arr), op1.arr)).transpose()
-        else:
-        	if op1.requires_grad:
-        		op1.grad += np.multiply(np.matmul(np.ones_like(op1.arr), op2.arr.transpose()), gradients)
-        	if op2.requires_grad:
-        		op2.grad += np.multiply(np.matmul(np.ones_like(op2.arr), op1.arr).transpose(), gradients)
+
+        x1 = np.matmul(np.ones_like(op1.arr), op2.arr.transpose())
+        x2 = (np.matmul(np.ones_like(op2.arr), op1.arr)).transpose()
+
+        if op1.requires_grad:
+            op1.grad += x1 if gradients is None else np.multiply(x1, gradients)
+        if op2.requires_grad:
+            op2.grad += x2 if gradients is None else np.multiply(x2, gradients)
 
         return (op1.grad, op2.grad)
 
