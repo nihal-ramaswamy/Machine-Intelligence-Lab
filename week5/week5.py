@@ -122,17 +122,26 @@ class Tensor:
                 Gradient to a and b
         """
         # TODO
-        op1 = self.history[1]
-        op2 = self.history[2]
-        op1.grad=np.zeros_like(op1.arr)
-        op2.grad=np.zeros_like(op2.arr)
-        if op1.requires_grad: op1.grad += np.ones_like(op1.arr)
-        if op2.requires_grad: op2.grad += np.ones_like(op2.arr)
-        if gradients is None:
-            return (op1.grad,op2.grad)
-        if op1.requires_grad: op1.grad = np.multiply(np.ones_like(op1.arr), gradients)
-        if op2.requires_grad: op2.grad = np.multiply(np.ones_like(op2.arr), gradients)
+        _, op1, op2 = self.history
+
+
+        for op in [op1, op2]:
+            op.grad = np.ones_like(op.arr) if op.requires_grad else np.zeros_like(op.arr)
+            if gradients is None:
+                continue
+            op.grad = np.multiply(np.ones_like(op.arr), gradients)
+
         return (op1.grad, op2.grad)
+
+        # op1.grad=np.zeros_like(op1.arr)
+        # op2.grad=np.zeros_like(op2.arr)
+        # if op1.requires_grad: op1.grad += np.ones_like(op1.arr)
+        # if op2.requires_grad: op2.grad += np.ones_like(op2.arr)
+        # if gradients is None:
+        #     return (op1.grad,op2.grad)
+        # if op1.requires_grad: op1.grad = np.multiply(np.ones_like(op1.arr), gradients)
+        # if op2.requires_grad: op2.grad = np.multiply(np.ones_like(op2.arr), gradients)
+        # return (op1.grad, op2.grad)
 
     def grad_matmul(self, gradients=None):
         """
@@ -147,8 +156,7 @@ class Tensor:
                 Gradients to a and b
         """
         # TODO
-        op1 = self.history[1]
-        op2 = self.history[2]
+        _, op1, op2 = self.history
         if gradients is None:
         	if op1.requires_grad:
         		op1.grad += np.matmul(np.ones_like(op1.arr), op2.arr.transpose())
