@@ -157,11 +157,6 @@ class Tensor:
                 op.grad += temp[j] if gradients is None else np.multiply(temp[j], gradients)
             j += 1
 
-        # if op1.requires_grad:
-        #     op1.grad += x1 if gradients is None else np.multiply(x1, gradients)
-        # if op2.requires_grad:
-        #     op2.grad += x2 if gradients is None else np.multiply(x2, gradients)
-
         return (op1.grad, op2.grad)
 
     def backward(self, gradients=None):
