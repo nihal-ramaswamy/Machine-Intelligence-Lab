@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
-
+from math import sqrt
+import pandas as pd
 """
 Use DecisionTreeClassifier to represent a stump.
 ------------------------------------------------
@@ -10,7 +11,8 @@ DecisionTreeClassifier Params:
     max_leaf_nodes -> 2
 Use the same parameters
 """
-# REFER THE INSTRUCTION PDF FOR THE FORMULA TO BE USED 
+# REFER THE INSTRUCTION PDF FOR THE FORMULA TO BE USED
+
 
 class AdaBoost:
 
@@ -24,6 +26,7 @@ class AdaBoost:
 
         self.n_stumps = n_stumps
         self.stumps = []
+        self.eps = 1e-9
 
     def fit(self, X, y):
         """
@@ -64,9 +67,9 @@ class AdaBoost:
         Returns:
             The error in the stump(float.)
         """
-
         # TODO
-        pass
+        return np.sum(sample_weights * np.where(y_pred !=
+                      y, 1, 0)) / np.sum(sample_weights)
 
     def compute_alpha(self, error):
         """
@@ -78,9 +81,8 @@ class AdaBoost:
         Returns:
             The alpha value(float.)
         """
-        eps = 1e-9
         # TODO
-        pass
+        return (0.5) * np.log((1 - error) / (error + self.eps))
 
     def update_weights(self, y, y_pred, sample_weights, alpha):
         """
@@ -94,9 +96,10 @@ class AdaBoost:
         Returns:
             new_sample_weights:  M Vector(new Weight of each sample float.)
         """
-
         # TODO
-        pass
+        error = self.stump_error(y, y_pred, sample_weights)
+        return (sample_weights) * np.exp(alpha * (np.not_equal(y, y_pred)).astype(int)) if error == 0 else [sample_weights[i] / (
+            2 * (1 - error)) if y[i] == y_pred[i] else sample_weights[i] / (2 * error) for i in range(len(sample_weights))]
 
     def predict(self, X):
         """
@@ -108,7 +111,8 @@ class AdaBoost:
             pred: N Vector(Class target predicted for all the inputs as int.)
         """
         # TODO
-        pass
+        return np.sign(np.array([self.stumps[stump].predict(X)
+                       for stump in range(self.n_stumps)])[0])
 
     def evaluate(self, X, y):
         """
@@ -120,9 +124,5 @@ class AdaBoost:
         Returns:
             accuracy : (float.)
         """
-        pred = self.predict(X)
         # find correct predictions
-        correct = (pred == y)
-
-        accuracy = np.mean(correct) * 100  # accuracy calculation
-        return accuracy
+        return np.mean((self.predict(X) == y)) * 100
